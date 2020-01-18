@@ -1,0 +1,38 @@
+dataset{
+    name: CIFAR10
+    root: /home/dataset/cifar
+    batch_size: 64
+    train_portion: 0.5
+    num_worker: 2
+}
+
+mechanism{
+    log_interval: 50
+    epochs: 50
+    model_path: saved_models
+    save_path: search
+    seed: 7777
+}
+
+strategy{
+    init_channels: 16
+    layers: 8
+    cutout: false
+    cutout_length: 16
+    drop_path_prob: 0.3
+    grad_clip: 5
+    unrolled: false
+}
+
+optimizer{
+    architecture{
+        learning_rate: 0.025
+        learning_rate_min: 0.001
+        momentum: 0.9
+        weight_decay: 3e-4
+    }
+    alpha{
+        learning_rate: 3e-4
+        weight_decay: 1e-3
+    }
+}

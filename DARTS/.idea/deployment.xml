@@ -2,28 +2,14 @@
 <project version="4">
   <component name="PublishConfigData" autoUpload="Always" serverName="liuzhiqiang@202.38.200.188:22">
     <serverData>
-      <paths name="116.56.143.170">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
-      <paths name="222.201.187.244">
-        <serverdata>
-          <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
-          </mappings>
-        </serverdata>
-      </paths>
       <paths name="liuzhiqiang@202.38.200.188:22">
         <serverdata>
           <mappings>
-            <mapping deploy="/home/liuzhiqiang/project/CODE-LZQ/DARTS" local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/home/liuzhiqiang/project/CODE-LZQ/DARTS" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="root@chenyaofo.ml:9000">
+      <paths name="xiezheng@222.201.187.245:22">
         <serverdata>
           <mappings>
             <mapping local="$PROJECT_DIR$" web="/" />

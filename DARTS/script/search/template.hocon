@@ -1,6 +1,7 @@
 dataset{
     name: CIFAR10
     root: /home/dataset/cifar
+    num_classes: 10
     batch_size: 64
     train_portion: 0.5
     num_worker: 2
@@ -12,6 +13,7 @@ mechanism{
     model_path: saved_models
     save_path: search
     seed: 7777
+    gpus: [0, 1]
 }
 
 strategy{

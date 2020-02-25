@@ -1,0 +1,37 @@
+dataset{
+    name: CIFAR10                        # Dataset name
+    root: /home/dataset/cifar
+    num_classes: 10
+    batch_size: 128
+    num_workers: 2
+}
+
+mechanism{
+    repeat: 1
+    log_interval: 50
+    epochs: 600
+    output_path: experiments/evaluate
+    experiment_id: DARTS_V1_600
+    seed: 7777
+}
+
+strategy{
+    arch: DARTS_V1
+    init_channels: 36
+    layers: 20
+    cutout: True
+    cutout_length: 16
+    drop_path_prob: 0.2
+    grad_clip: 5
+    auxiliary: True
+    auxiliary_weight: 0.4
+}
+
+optimizer{
+    model{
+        learning_rate: 0.025
+        learning_rate_min: 0.001
+        momentum: 0.9
+        weight_decay: 3e-4
+    }
+}

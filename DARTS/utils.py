@@ -1,10 +1,11 @@
 # @Author: LiuZhQ
 
 import os
-import numpy as np
-import torch
 import shutil
-import torchvision.transforms as transforms
+import sys
+import torch
+import numpy as np
+import torch.backends.cudnn as cudnn
 
 
 def count_parameters_in_MB(model):
@@ -23,62 +24,53 @@ def create_exp_dir(path, scripts_to_save=None):
             shutil.copyfile(script, dst_file)
 
 
-def data_transforms_cifar10(args):
-    CIFAR_MEAN = [0.49139968, 0.48215827, 0.44653124]
-    CIFAR_STD = [0.24703233, 0.24348505, 0.26158768]
-
-    train_transform = transforms.Compose([
-        transforms.RandomCrop(32, padding=4),
-        transforms.RandomHorizontalFlip(),
-        transforms.ToTensor(),
-        transforms.Normalize(CIFAR_MEAN, CIFAR_STD),
-    ])
-    if args.cutout:
-        train_transform.transforms.append(Cutout(args.cutout_length))
-
-    valid_transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize(CIFAR_MEAN, CIFAR_STD),
-    ])
-    return train_transform, valid_transform
-
-
-class Cutout(object):
-    def __init__(self, length):
-        self.length = length
-
-    def __call__(self, img):
-        h, w = img.size(1), img.size(2)
-        mask = np.ones((h, w), np.float32)
-        y = np.random.randint(h)
-        x = np.random.randint(w)
-
-        y1 = np.clip(y - self.length // 2, 0, h)
-        y2 = np.clip(y + self.length // 2, 0, h)
-        x1 = np.clip(x - self.length // 2, 0, w)
-        x2 = np.clip(x + self.length // 2, 0, w)
-
-        mask[y1: y2, x1: x2] = 0.
-        mask = torch.from_numpy(mask)
-        mask = mask.expand_as(img)
-        img *= mask
-        return img
-
-
-class AvgrageMeter(object):
+class AverageMeter(object):
+    """
+    Keeps track of most recent, average, sum, and count of a metric.
+    """
 
     def __init__(self):
         self.reset()
 
     def reset(self):
+        self.val = 0
         self.avg = 0
         self.sum = 0
-        self.cnt = 0
+        self.count = 0
 
     def update(self, val, n=1):
+        self.val = val
         self.sum += val * n
-        self.cnt += n
-        self.avg = self.sum / self.cnt
+        self.count += n
+        self.avg = self.sum / self.count
+
+
+class TimeRecorder(object):
+    """
+    Recode training time.
+    """
+
+    def __init__(self, start_epoch, epochs, logger):
+        self.total_time = 0.
+        self.remaining_time = 0.
+        self.epochs = epochs
+        self.start_epoch = start_epoch
+        self.logger = logger
+
+    def update(self, time):
+        self.total_time += time
+        self.start_epoch += 1
+        self.remaining_time = time * (self.epochs - self.start_epoch)
+
+        self.logger.info('Cost time=>' + self.format_time(self.total_time))
+        self.logger.info('Remaining time=>' + self.format_time(self.remaining_time))
+
+    @staticmethod
+    def format_time(time):
+        h = time // 3600
+        m = (time % 3600) // 60
+        s = (time % 3600) % 60
+        return '{}h{}m{}s'.format(h, m, s)
 
 
 def accuracy(output, target, topk=(1,)):
@@ -98,3 +90,28 @@ def accuracy(output, target, topk=(1,)):
 
 def save(model, model_path):
     torch.save(model.state_dict(), model_path)
+
+
+def drop_path(x, drop_prob):
+    if drop_prob > 0.:
+        keep_prob = 1. - drop_prob
+        mask = torch.cuda.FloatTensor(x.size(0), 1, 1, 1).bernoulli_(keep_prob)
+        x.div_(keep_prob)
+        x.mul_(mask)
+    return x
+
+
+def set_randomness(seed):
+    """
+    Control experimental randomness.
+    :param seed: Random seed
+    :return:
+    """
+    if not torch.cuda.is_available():
+        print('No gpu device available!')
+        sys.exit(1)
+    np.random.seed(seed)
+    cudnn.benchmark = True
+    torch.manual_seed(seed)
+    cudnn.enabled = True
+    torch.cuda.manual_seed(seed)

@@ -12,11 +12,11 @@ def _concat(xs):
 class Architect(object):
     def __init__(self, model, criterion, args):
         self.network_momentum = args.momentum
-        self.network_weight_decay = args.weight_decay
+        self.network_weight_decay = args.alpha_weight_decay
         self.model = model
         self.criterion = criterion
-        self.optimizer = torch.optim.Adam(self.model.arch_parameters(), lr=args.arch_learning_rate,
-                                          betas=(0.5, 0.999), weight_decay=args.arch_weight_decay)
+        self.optimizer = torch.optim.Adam(self.model.arch_parameters(), lr=args.alpha_lr,
+                                          betas=(0.5, 0.999), weight_decay=args.alpha_weight_decay)
 
     def step(self, input_train, target_train, input_valid, target_valid, eta, network_optimizer, unrolled):
         self.optimizer.zero_grad()
